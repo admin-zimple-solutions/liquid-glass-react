@@ -26,6 +26,11 @@ Card Example              |  Button Example
 
 > **⚠️ NOTE:** Safari and Firefox only partially support the effect (displacement will not be visible)
 
+### Known limitations
+
+- Chromium clips the displaced backdrop to the element's own box. The `standard` and `polar` maps push their samples outward, so on a flat background the outer part of the glass shows the page unfiltered; `prominent` and `shader` bend inward and don't have this.
+- The blur, saturation and displacement are all applied per frame; large glass areas are expensive on low-end GPUs.
+
 ## 🚀 Usage
 
 ### Installation
@@ -36,12 +41,14 @@ npm install liquid-glass-react
 
 ### Basic Usage
 
+The component is positioned from its centre point: give it `position: fixed` or `position: absolute` through `style`, with `top`/`left` pointing at where the centre of the glass should be. Left in normal document flow, the effect's layers end up in different places.
+
 ```tsx
 import LiquidGlass from 'liquid-glass-react'
 
 function App() {
   return (
-    <LiquidGlass>
+    <LiquidGlass style={{ position: 'fixed', top: '50%', left: '50%' }}>
       <div className="p-6">
         <h2>Your content here</h2>
         <p>This will have the liquid glass effect</p>
@@ -62,6 +69,7 @@ function App() {
   elasticity={0.35}
   cornerRadius={100}
   padding="8px 16px"
+  style={{ position: 'fixed', top: '50%', left: '50%' }}
   onClick={() => console.log('Button clicked!')}
 >
   <span className="text-white font-medium">Click Me</span>
