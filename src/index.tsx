@@ -31,6 +31,10 @@ const getMap = (mode: "standard" | "polar" | "prominent" | "shader", shaderMapUr
   }
 }
 
+// The prominent map stores its Y displacement in the green channel (its blue channel is empty);
+// the other bundled maps and the runtime shader map store it in blue.
+const getYChannel = (mode: "standard" | "polar" | "prominent" | "shader"): "G" | "B" => (mode === "prominent" ? "G" : "B")
+
 /* ---------- SVG filter (edge-only displacement) ---------- */
 const GlassFilter: React.FC<{ id: string; displacementScale: number; aberrationIntensity: number; width: number; height: number; mode: "standard" | "polar" | "prominent" | "shader"; shaderMapUrl?: string }> = ({
   id,
@@ -47,7 +51,7 @@ const GlassFilter: React.FC<{ id: string; displacementScale: number; aberrationI
         <feImage x="0" y="0" width="100%" height="100%" result="DISPLACEMENT_MAP" href={getMap(mode, shaderMapUrl)} preserveAspectRatio="xMidYMid slice" />
 
         {/* Red channel displacement with slight offset */}
-        <feDisplacementMap in="SourceGraphic" in2="DISPLACEMENT_MAP" scale={displacementScale * (mode === "shader" ? 1 : -1)} xChannelSelector="R" yChannelSelector="B" result="RED_DISPLACED" />
+        <feDisplacementMap in="SourceGraphic" in2="DISPLACEMENT_MAP" scale={displacementScale * (mode === "shader" ? 1 : -1)} xChannelSelector="R" yChannelSelector={getYChannel(mode)} result="RED_DISPLACED" />
         <feColorMatrix
           in="RED_DISPLACED"
           type="matrix"
@@ -59,7 +63,7 @@ const GlassFilter: React.FC<{ id: string; displacementScale: number; aberrationI
         />
 
         {/* Green channel displacement */}
-        <feDisplacementMap in="SourceGraphic" in2="DISPLACEMENT_MAP" scale={displacementScale * ((mode === "shader" ? 1 : -1) - aberrationIntensity * 0.05)} xChannelSelector="R" yChannelSelector="B" result="GREEN_DISPLACED" />
+        <feDisplacementMap in="SourceGraphic" in2="DISPLACEMENT_MAP" scale={displacementScale * ((mode === "shader" ? 1 : -1) - aberrationIntensity * 0.05)} xChannelSelector="R" yChannelSelector={getYChannel(mode)} result="GREEN_DISPLACED" />
         <feColorMatrix
           in="GREEN_DISPLACED"
           type="matrix"
@@ -71,7 +75,7 @@ const GlassFilter: React.FC<{ id: string; displacementScale: number; aberrationI
         />
 
         {/* Blue channel displacement with slight offset */}
-        <feDisplacementMap in="SourceGraphic" in2="DISPLACEMENT_MAP" scale={displacementScale * ((mode === "shader" ? 1 : -1) - aberrationIntensity * 0.1)} xChannelSelector="R" yChannelSelector="B" result="BLUE_DISPLACED" />
+        <feDisplacementMap in="SourceGraphic" in2="DISPLACEMENT_MAP" scale={displacementScale * ((mode === "shader" ? 1 : -1) - aberrationIntensity * 0.1)} xChannelSelector="R" yChannelSelector={getYChannel(mode)} result="BLUE_DISPLACED" />
         <feColorMatrix
           in="BLUE_DISPLACED"
           type="matrix"
